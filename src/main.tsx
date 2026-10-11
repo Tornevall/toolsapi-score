@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { api, submitEvent, type Participant, type Activity, type Summary, type Deduction } from './api';
 import './style.css';
@@ -14,6 +14,7 @@ function App() {
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
   const [busy, setBusy] = useState(false);
+  const pendingSubmission = useRef<{ signature: string; key: string; occurredAt: string } | null>(null);
 
   async function load() {
     try {
@@ -33,8 +34,12 @@ function App() {
     e.preventDefault();
     if (!participant || !activity || !Number.isInteger(quantity) || quantity < 1) return;
     setBusy(true); setNotice('');
+    const signature = JSON.stringify([participant, activity, quantity]);
+    if (!pendingSubmission.current || pendingSubmission.current.signature !== signature) pendingSubmission.current = { signature, key: crypto.randomUUID(), occurredAt: new Date().toISOString() };
+    const submission = pendingSubmission.current;
     try {
-      await submitEvent({ participant_id: Number(participant), activity_id: Number(activity), quantity, occurred_at: new Date().toISOString() }, crypto.randomUUID());
+      await submitEvent({ participant_id: Number(participant), activity_id: Number(activity), quantity, occurred_at: submission.occurredAt }, submission.key);
+      pendingSubmission.current = null;
       setNotice('Aktiviteten registrerades.'); await load();
     } catch (err) { setError(err instanceof Error ? err.message : 'Registreringen misslyckades.'); }
     finally { setBusy(false); }
