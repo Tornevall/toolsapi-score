@@ -101,8 +101,8 @@ function App() {
   async function createActivity(e: React.FormEvent) {
     e.preventDefault(); setBusy(true); setError('');
     try {
-      await api('/activities', { method: 'POST', body: JSON.stringify({ name: newActivity.trim(), points: newPoints }) });
-      setNewActivity(''); setNewPoints(0); setNotice('Aktiviteten skapades.'); await load();
+      await api('/activities', { method: 'POST', body: JSON.stringify({ name: newActivity.trim(), points: newPoints, daily_weight: newWeight }) });
+      setNewActivity(''); setNewPoints(0); setNewWeight(0); setNotice('Aktiviteten skapades.'); await load();
     } catch (err) { setError(err instanceof Error ? err.message : 'Kunde inte skapa aktiviteten.'); }
     finally { setBusy(false); }
   }
