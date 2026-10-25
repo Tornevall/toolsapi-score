@@ -11,6 +11,9 @@ function App() {
   const [participant, setParticipant] = useState('');
   const [activity, setActivity] = useState('');
   const [quantity, setQuantity] = useState(1);
+  const [newParticipant, setNewParticipant] = useState('');
+  const [newActivity, setNewActivity] = useState('');
+  const [newPoints, setNewPoints] = useState(0);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
   const [busy, setBusy] = useState(false);
@@ -29,6 +32,24 @@ function App() {
     } catch (e) { setError(e instanceof Error ? e.message : 'Kunde inte hämta data.'); }
   }
   useEffect(() => { void load(); }, []);
+
+  async function createParticipant(e: React.FormEvent) {
+    e.preventDefault(); setBusy(true); setError('');
+    try {
+      await api('/participants', { method: 'POST', body: JSON.stringify({ name: newParticipant.trim() }) });
+      setNewParticipant(''); setNotice('Deltagaren skapades.'); await load();
+    } catch (err) { setError(err instanceof Error ? err.message : 'Kunde inte skapa deltagaren.'); }
+    finally { setBusy(false); }
+  }
+
+  async function createActivity(e: React.FormEvent) {
+    e.preventDefault(); setBusy(true); setError('');
+    try {
+      await api('/activities', { method: 'POST', body: JSON.stringify({ name: newActivity.trim(), points: newPoints }) });
+      setNewActivity(''); setNewPoints(0); setNotice('Aktiviteten skapades.'); await load();
+    } catch (err) { setError(err instanceof Error ? err.message : 'Kunde inte skapa aktiviteten.'); }
+    finally { setBusy(false); }
+  }
 
   async function register(e: React.FormEvent) {
     e.preventDefault();
@@ -49,6 +70,17 @@ function App() {
     <header><h1>Tools Score</h1><p>Aktiviteter, antal, poäng och belöningar</p></header>
     {error && <p role="alert" className="error">{error}</p>}
     {notice && <p role="status">{notice}</p>}
+    <section><h2>Administrera deltagare och aktiviteter</h2>
+      <form onSubmit={createParticipant}>
+        <label>Ny deltagare<input value={newParticipant} maxLength={120} onChange={e => setNewParticipant(e.target.value)} required /></label>
+        <button disabled={busy || !newParticipant.trim()}>Lägg till deltagare</button>
+      </form>
+      <form onSubmit={createActivity}>
+        <label>Ny aktivitet<input value={newActivity} maxLength={120} onChange={e => setNewActivity(e.target.value)} required /></label>
+        <label>Poäng<input type="number" min="-100000" max="100000" step="1" value={newPoints} onChange={e => setNewPoints(Number(e.target.value))} required /></label>
+        <button disabled={busy || !newActivity.trim() || !Number.isInteger(newPoints)}>Lägg till aktivitet</button>
+      </form>
+    </section>
     <section><h2>Registrera aktivitet</h2>
       <form onSubmit={register}>
         <label>Person<select value={participant} onChange={e => setParticipant(e.target.value)} required>{participants.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}</select></label>
