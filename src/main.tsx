@@ -172,7 +172,7 @@ function App() {
         {new Date(item.created_at).toLocaleString('sv-SE')}{item.event_id ? ` · Registrering #${item.event_id}` : ''}: {item.body}
       </li>)}</ul>
     </section>
-    <DailyEarnings participant={participant} />
+    <DailyEarnings participant={participant} activities={activities} />
     <Goals participant={participant} participants={participants} />
     <section><h2>Översikt</h2><div className="cards">{summaries.map(s => <article key={s.participant_id}>
       <h3>{participants.find(p => p.id === s.participant_id)?.name ?? 'Deltagare'}</h3>
