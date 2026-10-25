@@ -117,6 +117,7 @@ function App() {
       await submitEvent({ participant_id: Number(participant), activity_id: Number(activity), quantity, occurred_at: submission.occurredAt }, submission.key);
       pendingSubmission.current = null;
       setNotice('Aktiviteten registrerades.'); await load();
+      setEvents(await api<ScoreEvent[]>('/participants/' + participant + '/events'));
     } catch (err) { setError(err instanceof Error ? err.message : 'Registreringen misslyckades.'); }
     finally { setBusy(false); }
   }
