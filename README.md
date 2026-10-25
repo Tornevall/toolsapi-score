@@ -42,3 +42,6 @@ No license has been selected yet. Public visibility alone does not grant redistr
 ## Allowance calculation foundation
 
 `src/allowance.ts` contains pure, frontend-only preview calculations for a configurable monthly cap, optional base amount, and weighted daily completion bonus with a percentage threshold. Point visibility and positive/negative settings are modeled independently. A day without eligible routines does not qualify. Money uses integer minor units. No backend endpoints, bank transfers, or approval workflow are implemented by these calculations; ToolsAPI must independently validate and authorize every ledger mutation.
+
+## Goals and planning (work in progress)
+The React client now has visual goal cards with category (personal, reward, planning), level and achievability ratings (1–5), a due date, a checklist and progress indicator. Owners can complete steps and approve completed goals using ToolsAPI session-authenticated endpoints. Completing or approving a goal does not automatically grant network access, pay money, or redeem a reward.
