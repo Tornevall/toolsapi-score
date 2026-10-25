@@ -22,6 +22,15 @@ function App() {
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
   const [busy, setBusy] = useState(false);
+  useEffect(() => {
+    const found = plans.find(p => String(p.participant_id) === participant);
+    setPlanDraft(found ? {
+      monthly_cap_minor: found.monthly_cap_minor, base_minor: found.base_minor,
+      currency: 'SEK', completion_threshold_percent: found.completion_threshold_percent,
+      daily_bonus_minor: found.daily_bonus_minor, show_points: found.show_points,
+      allow_positive_points: found.allow_positive_points, allow_negative_points: found.allow_negative_points
+    } : emptyPlan);
+  }, [participant, plans]);
   const pendingSubmission = useRef<{ signature: string; key: string; occurredAt: string } | null>(null);
 
   async function load() {
@@ -122,7 +131,7 @@ function App() {
       <h3>{participants.find(p => p.id === s.participant_id)?.name ?? 'Deltagare'}</h3>
       <dl><dt>Utförda aktiviteter</dt><dd>{s.completed_count}</dd><dt>Utförd mängd</dt><dd>{s.completed_quantity}</dd>{plans.find(p => p.participant_id === s.participant_id)?.show_points !== false && <><dt>Pluspoäng</dt><dd>{s.positive_points}</dd><dt>Minuspoäng</dt><dd>{s.negative_points}</dd><dt>Netto</dt><dd>{s.net_points}</dd></>}</dl>
     </article>)}</div></section>
-    <section><h2>Separata minusposter</h2>{deductions.length ? <ul>{deductions.map(d => <li key={d.id}>{participants.find(p => p.id === d.participant_id)?.name}: {d.reason} ({d.points})</li>)}</ul> : <p>Inga minusposter registrerade.</p>}</section>
+    {plans.some(p => p.show_points && p.allow_negative_points) && <section><h2>Separata minusposter</h2>{deductions.length ? <ul>{deductions.map(d => <li key={d.id}>{participants.find(p => p.id === d.participant_id)?.name}: {d.reason} ({d.points})</li>)}</ul> : <p>Inga minusposter registrerade.</p>}</section>}
     <footer>All data hämtas från ToolsAPI. Behörigheter och poäng beräknas på servern.</footer>
   </main>;
 }
