@@ -55,6 +55,7 @@ export function DailyEarnings({ participant, activities }: { participant: string
     <form onSubmit={approve}>
       <label>Datum<input type="date" value={date} max={new Date().toISOString().slice(0, 10)} onChange={e => setDate(e.target.value)} required /></label>
       <label>Förväntat antal rutiner<input type="number" min="1" max="10000" step="1" value={expected} onChange={e => setExpected(Number(e.target.value))} required /></label>
+      <fieldset><legend>Undantag för dagen</legend>{activities.filter(a => a.daily_weight > 0).map(a => <label key={a.id}><input type="checkbox" checked={excluded.includes(a.id)} onChange={e => setExcluded(old => e.target.checked ? [...old, a.id] : old.filter(id => id !== a.id))} /> {a.name} (vikt {a.daily_weight})</label>)}</fieldset>
       <button disabled={busy || !participant || expected < 1 || !Number.isInteger(expected)}>Godkänn dagen</button>
     </form>
     <h3>Godkända dagar</h3>
