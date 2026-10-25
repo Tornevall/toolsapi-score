@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- Configure weighted daily routines and exempt individual routines when approving a day; backend calculates completion from eligible weights.
 - Add parent-approved daily completion reviews with monthly capped bonus totals from ToolsAPI. Reviews are immutable and auditable; automatic payments are not included.
 - Add participant and activity creation, allowance-plan editing, participant/event comments and goal/checklist approval interface.
 - Display signed activity point values and comment-linked event identifiers.
