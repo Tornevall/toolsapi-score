@@ -10,6 +10,8 @@ Open-source React + TypeScript frontend for ToolsAPI's individual activity and s
 - Read-only list of negative events
 - Participant and activity administration, monthly allowance plan settings and comments on participants or events
 - Goal cards, checklists, progress tracking and manual goal approval
+- Parent-approved daily completion reviews and monthly earned allowance overview
+- Activity event history with direct comment-to-event selection
 - Typed HTTP client with session credentials and an idempotency key for registrations
 
 **Integration status:** ToolsAPI implements the Score endpoints on the matching backend feature branch. Deploy the matching ToolsAPI and React branches together; the frontend alone cannot serve or persist data. Automatic daily earning, payout settlement and Android integration are not yet implemented.
