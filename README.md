@@ -38,3 +38,7 @@ See [AGENTS.md](AGENTS.md) for contributor rules and [CHANGELOG.md](CHANGELOG.md
 ## License
 
 No license has been selected yet. Public visibility alone does not grant redistribution or modification rights; the repository owner should select an open-source license before inviting external reuse.
+
+## Allowance calculation foundation
+
+`src/allowance.ts` contains pure, frontend-only preview calculations for a configurable monthly cap, optional base amount, and weighted daily completion bonus with a percentage threshold. Point visibility and positive/negative settings are modeled independently. A day without eligible routines does not qualify. Money uses integer minor units. No backend endpoints, bank transfers, or approval workflow are implemented by these calculations; ToolsAPI must independently validate and authorize every ledger mutation.
