@@ -27,6 +27,7 @@ function App() {
   const [newParticipant, setNewParticipant] = useState('');
   const [newActivity, setNewActivity] = useState('');
   const [newPoints, setNewPoints] = useState(0);
+  const [newWeight, setNewWeight] = useState(0);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
   const [busy, setBusy] = useState(false);
