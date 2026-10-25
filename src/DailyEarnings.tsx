@@ -1,14 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { api } from './api';
+import { api, type Activity } from './api';
 
 type DailyReview = { id: number; review_date: string; expected_quantity: number; completed_quantity: number; completion_percent: number; credited_minor: number };
 type Earnings = { month: string; base_minor: number; bonus_minor: number; earned_minor: number; monthly_cap_minor: number };
 const sek = (minor: number) => (minor / 100).toLocaleString('sv-SE', { style: 'currency', currency: 'SEK' });
 
-export function DailyEarnings({ participant }: { participant: string }) {
+export function DailyEarnings({ participant, activities }: { participant: string; activities: Activity[] }) {
   const [month, setMonth] = useState(() => new Date().toISOString().slice(0, 7));
   const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [expected, setExpected] = useState(1);
+  const [excluded, setExcluded] = useState<number[]>([]);
   const [reviews, setReviews] = useState<DailyReview[]>([]);
   const [earnings, setEarnings] = useState<Earnings | null>(null);
   const [error, setError] = useState('');
@@ -30,7 +31,7 @@ export function DailyEarnings({ participant }: { participant: string }) {
     setBusy(true); setError('');
     try {
       await api('/participants/' + participant + '/daily-reviews', {
-        method: 'POST', body: JSON.stringify({ review_date: date, expected_quantity: expected })
+        method: 'POST', body: JSON.stringify({ review_date: date, expected_quantity: expected, excluded_activity_ids: excluded })
       });
       const [days, totals] = await Promise.all([
         api<DailyReview[]>('/participants/' + participant + '/daily-reviews'),
