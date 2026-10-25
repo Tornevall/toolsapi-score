@@ -4,7 +4,7 @@ import { api, submitEvent, type Participant, type Activity, type Summary, type D
 import './style.css';
 import { Goals } from './Goals';
 
-type ScoreComment = { id: number; body: string; created_at: string };
+type ScoreComment = { id: number; event_id: number | null; body: string; created_at: string };
 type AllowancePlanRecord = { participant_id: number; monthly_cap_minor: number; base_minor: number; currency: 'SEK'; completion_threshold_percent: number; daily_bonus_minor: number; show_points: boolean; allow_positive_points: boolean; allow_negative_points: boolean };
 const emptyPlan = { monthly_cap_minor: 125000, base_minor: 0, currency: 'SEK' as const, completion_threshold_percent: 80, daily_bonus_minor: 0, show_points: false, allow_positive_points: false, allow_negative_points: false };
 
@@ -150,7 +150,7 @@ function App() {
     <section><h2>Registrera aktivitet</h2>
       <form onSubmit={register}>
         <label>Person<select value={participant} onChange={e => setParticipant(e.target.value)} required>{participants.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}</select></label>
-        <label>Aktivitet<select value={activity} onChange={e => setActivity(e.target.value)} required>{activities.map(a => <option key={a.id} value={a.id}>{a.name} (+{a.points})</option>)}</select></label>
+        <label>Aktivitet<select value={activity} onChange={e => setActivity(e.target.value)} required>{activities.map(a => <option key={a.id} value={a.id}>{a.name} ({a.points > 0 ? '+' : ''}{a.points})</option>)}</select></label>
         <label>Antal<input type="number" min="1" step="1" value={quantity} onChange={e => setQuantity(Number(e.target.value))} required /></label>
         <button disabled={busy || !participant || !activity}>{busy ? 'Sparar...' : 'Registrera'}</button>
       </form>
@@ -162,7 +162,7 @@ function App() {
         <button disabled={busy || !participant || !commentText.trim()}>Spara kommentar</button>
       </form>
       <ul>{comments.map(item => <li key={item.id}>
-        {new Date(item.created_at).toLocaleString('sv-SE')}: {item.body}
+        {new Date(item.created_at).toLocaleString('sv-SE')}{item.event_id ? ` · Registrering #${item.event_id}` : ''}: {item.body}
       </li>)}</ul>
     </section>
     <Goals participant={participant} participants={participants} />
