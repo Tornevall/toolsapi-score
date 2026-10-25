@@ -5,6 +5,7 @@ import './style.css';
 import { Goals } from './Goals';
 import { DailyEarnings } from './DailyEarnings';
 
+type ScoreEvent = { id: number; activity_name: string; quantity: number; points_snapshot: number; occurred_at: string };
 type ScoreComment = { id: number; event_id: number | null; body: string; created_at: string };
 type AllowancePlanRecord = { participant_id: number; monthly_cap_minor: number; base_minor: number; currency: 'SEK'; completion_threshold_percent: number; daily_bonus_minor: number; show_points: boolean; allow_positive_points: boolean; allow_negative_points: boolean };
 const emptyPlan = { monthly_cap_minor: 125000, base_minor: 0, currency: 'SEK' as const, completion_threshold_percent: 80, daily_bonus_minor: 0, show_points: false, allow_positive_points: false, allow_negative_points: false };
@@ -16,6 +17,7 @@ function App() {
   const [deductions, setDeductions] = useState<Deduction[]>([]);
   const [plans, setPlans] = useState<AllowancePlanRecord[]>([]);
   const [comments, setComments] = useState<ScoreComment[]>([]);
+  const [events, setEvents] = useState<ScoreEvent[]>([]);
   const [commentText, setCommentText] = useState('');
   const [commentEventId, setCommentEventId] = useState('');
   const [planDraft, setPlanDraft] = useState(emptyPlan);
@@ -53,10 +55,10 @@ function App() {
   }
   useEffect(() => { void load(); }, []);
   useEffect(() => {
-    if (!participant) { setComments([]); return; }
+    if (!participant) { setComments([]); setEvents([]); return; }
     let active = true;
-    api<ScoreComment[]>('/participants/' + participant + '/comments')
-      .then(rows => { if (active) setComments(rows); })
+    Promise.all([api<ScoreComment[]>('/participants/' + participant + '/comments'), api<ScoreEvent[]>('/participants/' + participant + '/events')])
+      .then(([rows, records]) => { if (active) { setComments(rows); setEvents(records); } })
       .catch(err => { if (active) setError(String(err)); });
     return () => { active = false; };
   }, [participant]);
@@ -156,10 +158,11 @@ function App() {
         <button disabled={busy || !participant || !activity}>{busy ? 'Sparar...' : 'Registrera'}</button>
       </form>
     </section>
+    <section><h2>Registreringshistorik</h2><ul>{events.map(ev => <li key={ev.id}>#{ev.id} – {ev.activity_name}: {ev.quantity} st, {ev.points_snapshot} poäng/st ({new Date(ev.occurred_at).toLocaleString('sv-SE')})</li>)}</ul></section>
     <section><h2>Kommentarer</h2>
       <form onSubmit={addComment}>
         <label>Kommentar<textarea rows={3} maxLength={5000} value={commentText} onChange={e => setCommentText(e.target.value)} required /></label>
-        <label>Registrerings-ID (valfritt)<input type="number" min="1" step="1" value={commentEventId} onChange={e => setCommentEventId(e.target.value)} /></label>
+        <label>Koppla till registrering (valfritt)<select value={commentEventId} onChange={e => setCommentEventId(e.target.value)}><option value="">Allmän kommentar</option>{events.map(ev => <option key={ev.id} value={ev.id}>#{ev.id} – {ev.activity_name} ({ev.quantity} st)</option>)}</select></label>
         <button disabled={busy || !participant || !commentText.trim()}>Spara kommentar</button>
       </form>
       <ul>{comments.map(item => <li key={item.id}>
