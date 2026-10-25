@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { api, submitEvent, type Participant, type Activity, type Summary, type Deduction } from './api';
 import './style.css';
 import { Goals } from './Goals';
+import { DailyEarnings } from './DailyEarnings';
 
 type ScoreComment = { id: number; event_id: number | null; body: string; created_at: string };
 type AllowancePlanRecord = { participant_id: number; monthly_cap_minor: number; base_minor: number; currency: 'SEK'; completion_threshold_percent: number; daily_bonus_minor: number; show_points: boolean; allow_positive_points: boolean; allow_negative_points: boolean };
@@ -165,6 +166,7 @@ function App() {
         {new Date(item.created_at).toLocaleString('sv-SE')}{item.event_id ? ` · Registrering #${item.event_id}` : ''}: {item.body}
       </li>)}</ul>
     </section>
+    <DailyEarnings participant={participant} />
     <Goals participant={participant} participants={participants} />
     <section><h2>Översikt</h2><div className="cards">{summaries.map(s => <article key={s.participant_id}>
       <h3>{participants.find(p => p.id === s.participant_id)?.name ?? 'Deltagare'}</h3>
