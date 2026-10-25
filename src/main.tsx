@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { api, submitEvent, type Participant, type Activity, type Summary, type Deduction } from './api';
 import './style.css';
 
+type ScoreComment = { id: number; body: string; created_at: string };
 type AllowancePlanRecord = { participant_id: number; monthly_cap_minor: number; base_minor: number; currency: 'SEK'; completion_threshold_percent: number; daily_bonus_minor: number; show_points: boolean; allow_positive_points: boolean; allow_negative_points: boolean };
 const emptyPlan = { monthly_cap_minor: 125000, base_minor: 0, currency: 'SEK' as const, completion_threshold_percent: 80, daily_bonus_minor: 0, show_points: false, allow_positive_points: false, allow_negative_points: false };
 
@@ -12,6 +13,8 @@ function App() {
   const [summaries, setSummaries] = useState<Summary[]>([]);
   const [deductions, setDeductions] = useState<Deduction[]>([]);
   const [plans, setPlans] = useState<AllowancePlanRecord[]>([]);
+  const [comments, setComments] = useState<ScoreComment[]>([]);
+  const [commentText, setCommentText] = useState('');
   const [planDraft, setPlanDraft] = useState(emptyPlan);
   const [participant, setParticipant] = useState('');
   const [activity, setActivity] = useState('');
@@ -46,6 +49,28 @@ function App() {
     } catch (e) { setError(e instanceof Error ? e.message : 'Kunde inte hämta data.'); }
   }
   useEffect(() => { void load(); }, []);
+  useEffect(() => {
+    if (!participant) { setComments([]); return; }
+    let active = true;
+    api<ScoreComment[]>('/participants/' + participant + '/comments')
+      .then(rows => { if (active) setComments(rows); })
+      .catch(err => { if (active) setError(String(err)); });
+    return () => { active = false; };
+  }, [participant]);
+  async function addComment(e: React.FormEvent) {
+    e.preventDefault();
+    if (!participant || !commentText.trim()) return;
+    setBusy(true);
+    try {
+      await api('/participants/' + participant + '/comments', {
+        method: 'POST', body: JSON.stringify({ body: commentText.trim() })
+      });
+      setCommentText('');
+      setComments(await api<ScoreComment[]>('/participants/' + participant + '/comments'));
+      setNotice('Kommentaren sparades.');
+    } catch (err) { setError(String(err)); }
+    finally { setBusy(false); }
+  }
 
   async function savePlan(e: React.FormEvent) {
     e.preventDefault(); if (!participant) return;
@@ -126,6 +151,15 @@ function App() {
         <label>Antal<input type="number" min="1" step="1" value={quantity} onChange={e => setQuantity(Number(e.target.value))} required /></label>
         <button disabled={busy || !participant || !activity}>{busy ? 'Sparar...' : 'Registrera'}</button>
       </form>
+    </section>
+    <section><h2>Kommentarer</h2>
+      <form onSubmit={addComment}>
+        <label>Kommentar<textarea rows={3} maxLength={5000} value={commentText} onChange={e => setCommentText(e.target.value)} required /></label>
+        <button disabled={busy || !participant || !commentText.trim()}>Spara kommentar</button>
+      </form>
+      <ul>{comments.map(item => <li key={item.id}>
+        {new Date(item.created_at).toLocaleString('sv-SE')}: {item.body}
+      </li>)}</ul>
     </section>
     <section><h2>Översikt</h2><div className="cards">{summaries.map(s => <article key={s.participant_id}>
       <h3>{participants.find(p => p.id === s.participant_id)?.name ?? 'Deltagare'}</h3>
