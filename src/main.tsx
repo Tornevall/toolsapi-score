@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { api, submitEvent, type Participant, type Activity, type Summary, type Deduction } from './api';
 import './style.css';
+import { Goals } from './Goals';
 
 type ScoreComment = { id: number; body: string; created_at: string };
 type AllowancePlanRecord = { participant_id: number; monthly_cap_minor: number; base_minor: number; currency: 'SEK'; completion_threshold_percent: number; daily_bonus_minor: number; show_points: boolean; allow_positive_points: boolean; allow_negative_points: boolean };
@@ -161,6 +162,7 @@ function App() {
         {new Date(item.created_at).toLocaleString('sv-SE')}: {item.body}
       </li>)}</ul>
     </section>
+    <Goals participant={participant} participants={participants} />
     <section><h2>Översikt</h2><div className="cards">{summaries.map(s => <article key={s.participant_id}>
       <h3>{participants.find(p => p.id === s.participant_id)?.name ?? 'Deltagare'}</h3>
       <dl><dt>Utförda aktiviteter</dt><dd>{s.completed_count}</dd><dt>Utförd mängd</dt><dd>{s.completed_quantity}</dd>{plans.find(p => p.participant_id === s.participant_id)?.show_points !== false && <><dt>Pluspoäng</dt><dd>{s.positive_points}</dd><dt>Minuspoäng</dt><dd>{s.negative_points}</dd><dt>Netto</dt><dd>{s.net_points}</dd></>}</dl>
