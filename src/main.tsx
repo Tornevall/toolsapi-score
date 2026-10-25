@@ -16,6 +16,7 @@ function App() {
   const [plans, setPlans] = useState<AllowancePlanRecord[]>([]);
   const [comments, setComments] = useState<ScoreComment[]>([]);
   const [commentText, setCommentText] = useState('');
+  const [commentEventId, setCommentEventId] = useState('');
   const [planDraft, setPlanDraft] = useState(emptyPlan);
   const [participant, setParticipant] = useState('');
   const [activity, setActivity] = useState('');
@@ -64,9 +65,10 @@ function App() {
     setBusy(true);
     try {
       await api('/participants/' + participant + '/comments', {
-        method: 'POST', body: JSON.stringify({ body: commentText.trim() })
+        method: 'POST', body: JSON.stringify({ body: commentText.trim(), event_id: commentEventId ? Number(commentEventId) : null })
       });
       setCommentText('');
+      setCommentEventId('');
       setComments(await api<ScoreComment[]>('/participants/' + participant + '/comments'));
       setNotice('Kommentaren sparades.');
     } catch (err) { setError(String(err)); }
@@ -156,6 +158,7 @@ function App() {
     <section><h2>Kommentarer</h2>
       <form onSubmit={addComment}>
         <label>Kommentar<textarea rows={3} maxLength={5000} value={commentText} onChange={e => setCommentText(e.target.value)} required /></label>
+        <label>Registrerings-ID (valfritt)<input type="number" min="1" step="1" value={commentEventId} onChange={e => setCommentEventId(e.target.value)} /></label>
         <button disabled={busy || !participant || !commentText.trim()}>Spara kommentar</button>
       </form>
       <ul>{comments.map(item => <li key={item.id}>
