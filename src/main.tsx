@@ -135,7 +135,8 @@ function App() {
       <form onSubmit={createActivity}>
         <label>Ny aktivitet<input value={newActivity} maxLength={120} onChange={e => setNewActivity(e.target.value)} required /></label>
         <label>Poäng<input type="number" min="-100000" max="100000" step="1" value={newPoints} onChange={e => setNewPoints(Number(e.target.value))} required /></label>
-        <button disabled={busy || !newActivity.trim() || !Number.isInteger(newPoints)}>Lägg till aktivitet</button>
+        <label>Rutinens vikt (0 = valfri)<input type="number" min="0" max="1000" step="1" value={newWeight} onChange={e => setNewWeight(Number(e.target.value))} required /></label>
+        <button disabled={busy || !newActivity.trim() || !Number.isInteger(newPoints) || !Number.isInteger(newWeight)}>Lägg till aktivitet</button>
       </form>
     </section>
     <section><h2>Månadspott och heldagsbonus</h2>
