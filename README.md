@@ -49,3 +49,7 @@ No license has been selected yet. Public visibility alone does not grant redistr
 
 ## Goals and planning (work in progress)
 The React client now has visual goal cards with category (personal, reward, planning), level and achievability ratings (1–5), a due date, a checklist and progress indicator. Owners can complete steps and approve completed goals using ToolsAPI session-authenticated endpoints. Completing or approving a goal does not automatically grant network access, pay money, or redeem a reward.
+
+## Visual design
+
+The interface uses responsive cards, accessible focus outlines, 44px minimum control heights, high-contrast notices and a mobile single-column layout. Styling is maintained in `src/style.css` without additional UI dependencies.
