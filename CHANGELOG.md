@@ -1,0 +1,17 @@
+# Changelog
+
+## Unreleased
+- Align React Score with the shipped ToolsAPI contract: Today's routine progress, groups, individual schedules, account-link consent, recipient read-only view and signed owner-deletion previews.
+- Keep CSRF session authentication, stale-selection protection, responsive routine controls and existing event-idempotency behavior; update backend integration docs.
+- Add responsive Score overview with monthly earnings, approved-day completion, recent observations and activity charts; label API history limits.
+- Add a historical observation form for free-standing notes, routine-linked events, deviations, and partial goal completion.
+- Allow activity registration on an explicitly selected historical date, with the current timestamp as default.
+- Refresh the Score visual design with responsive layouts, clear card hierarchy, keyboard focus states, and accessible form controls.
+- Configure weighted daily routines and exempt individual routines when approving a day; backend calculates completion from eligible weights.
+- Add parent-approved daily completion reviews with monthly capped bonus totals from ToolsAPI. Reviews are immutable and auditable; automatic payments are not included.
+- Add participant and activity creation, allowance-plan editing, participant/event comments and goal/checklist approval interface.
+- Display signed activity point values and comment-linked event identifiers.
+- Add configurable allowance plan types, weighted percentage-based daily bonus preview calculations, monthly credit caps and focused unit tests. No server-side payouts or persistence yet.
+- Bootstrap a standalone React + TypeScript Score frontend.
+- Add typed API client, activity registration, participant summaries, and separate deduction display.
+- Document authentication expectations and backend integration requirements.
