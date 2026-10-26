@@ -53,3 +53,5 @@ The React client now has visual goal cards with category (personal, reward, plan
 ## Visual design
 
 The interface uses responsive cards, accessible focus outlines, 44px minimum control heights, high-contrast notices and a mobile single-column layout. Styling is maintained in `src/style.css` without additional UI dependencies.
+
+Activity registration supports an optional historical date. Leaving it blank records the current time; choosing a date records local noon on that date. Already approved daily reviews are immutable and are not recalculated by backdated entries.
