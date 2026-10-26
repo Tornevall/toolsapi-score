@@ -4,6 +4,7 @@ import { api, submitEvent, type Participant, type Activity, type Summary, type D
 import './style.css';
 import { Goals } from './Goals';
 import { DailyEarnings } from './DailyEarnings';
+import { Observations } from './Observations';
 
 type ScoreEvent = { id: number; activity_name: string; quantity: number; points_snapshot: number; occurred_at: string };
 type ScoreComment = { id: number; event_id: number | null; body: string; created_at: string };
@@ -175,6 +176,7 @@ function App() {
       </li>)}</ul>
     </section>
     <DailyEarnings participant={participant} activities={activities} />
+    <Observations participant={participant} activities={activities} />
     <Goals participant={participant} participants={participants} />
     <section><h2>Översikt</h2><div className="cards">{summaries.map(s => <article key={s.participant_id}>
       <h3>{participants.find(p => p.id === s.participant_id)?.name ?? 'Deltagare'}</h3>
