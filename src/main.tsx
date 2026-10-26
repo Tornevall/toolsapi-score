@@ -6,6 +6,8 @@ import { Goals } from './Goals';
 import { DailyEarnings } from './DailyEarnings';
 import { Observations } from './Observations';
 import { ScoreDashboard } from './ScoreDashboard';
+import { ScoreRoutines } from './ScoreRoutines';
+import { ScoreAccountsAndDeletion } from './ScoreAccountsAndDeletion';
 
 type ScoreEvent = { id: number; activity_name: string; quantity: number; points_snapshot: number; occurred_at: string };
 type ScoreComment = { id: number; event_id: number | null; body: string; created_at: string };
@@ -34,6 +36,7 @@ function App() {
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
   const [busy, setBusy] = useState(false);
+  const [revision, setRevision] = useState(0);
   useEffect(() => {
     const found = plans.find(p => String(p.participant_id) === participant);
     setPlanDraft(found ? {
@@ -52,8 +55,9 @@ function App() {
         api<Summary[]>('/statistics'), api<Deduction[]>('/deductions'), api<AllowancePlanRecord[]>('/allowance-plans')
       ]);
       setParticipants(people); setActivities(tasks); setSummaries(totals); setDeductions(negatives); setPlans(allowancePlans);
-      setParticipant(old => old || String(people[0]?.id ?? ''));
-      setActivity(old => old || String(tasks[0]?.id ?? ''));
+      setRevision(old => old + 1);
+      setParticipant(old => people.some(p => String(p.id) === old) ? old : String(people[0]?.id ?? ''));
+      setActivity(old => tasks.some(a => String(a.id) === old) ? old : String(tasks[0]?.id ?? ''));
       setError('');
     } catch (e) { setError(e instanceof Error ? e.message : 'Kunde inte hämta data.'); }
   }
@@ -139,8 +143,8 @@ function App() {
       <form onSubmit={createActivity}>
         <label>Ny aktivitet<input value={newActivity} maxLength={120} onChange={e => setNewActivity(e.target.value)} required /></label>
         <label>Poäng<input type="number" min="-100000" max="100000" step="1" value={newPoints} onChange={e => setNewPoints(Number(e.target.value))} required /></label>
-        <label>Rutinens vikt (0 = valfri)<input type="number" min="0" max="1000" step="1" value={newWeight} onChange={e => setNewWeight(Number(e.target.value))} required /></label>
-        <button disabled={busy || !newActivity.trim() || !Number.isInteger(newPoints) || !Number.isInteger(newWeight)}>Lägg till aktivitet</button>
+        <label>Rutinens vikt (0 = valfri)<input type="number" min="0" max="3" step="1" value={newWeight} onChange={e => setNewWeight(Number(e.target.value))} required /></label>
+        <button disabled={busy || !newActivity.trim() || !Number.isInteger(newPoints) || !Number.isInteger(newWeight) || newWeight < 0 || newWeight > 3}>Lägg till aktivitet</button>
       </form>
     </section>
     <section><h2>Månadspott och heldagsbonus</h2>
@@ -177,9 +181,11 @@ function App() {
         {new Date(item.created_at).toLocaleString('sv-SE')}{item.event_id ? ` · Registrering #${item.event_id}` : ''}: {item.body}
       </li>)}</ul>
     </section>
+    <ScoreRoutines participant={participant} participants={participants} activities={activities} revision={revision} refresh={load} />
     <DailyEarnings participant={participant} activities={activities} />
     <Observations participant={participant} activities={activities} />
     <Goals participant={participant} participants={participants} />
+    <ScoreAccountsAndDeletion participant={participant} participants={participants} activities={activities} revision={revision} refresh={load} />
     <section><h2>Översikt</h2><div className="cards">{summaries.map(s => <article key={s.participant_id}>
       <h3>{participants.find(p => p.id === s.participant_id)?.name ?? 'Deltagare'}</h3>
       <dl><dt>Utförda aktiviteter</dt><dd>{s.completed_count}</dd><dt>Utförd mängd</dt><dd>{s.completed_quantity}</dd>{plans.find(p => p.participant_id === s.participant_id)?.show_points !== false && <><dt>Pluspoäng</dt><dd>{s.positive_points}</dd><dt>Minuspoäng</dt><dd>{s.negative_points}</dd><dt>Netto</dt><dd>{s.net_points}</dd></>}</dl>

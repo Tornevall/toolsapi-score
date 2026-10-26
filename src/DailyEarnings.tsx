@@ -43,7 +43,7 @@ export function DailyEarnings({ participant, activities }: { participant: string
   }
   return <section>
     <h2>Heldagsbonus och intjänat</h2>
-    <p>Föräldern anger dagens förväntade antal rutiner. Systemet räknar registrerad mängd, jämför procentgränsen och låser dagens beslut. Inga automatiska straffavdrag.</p>
+    <p>Systemet räknar automatiskt dagens schemalagda, viktade rutiner; fältet för förväntat antal är en uppgift till API:et och styr inte serverns beräkning. Godkännandet låser dagens beslut. Inga automatiska straffavdrag.</p>
     {error && <p role="alert" className="error">{error}</p>}
     <label>Redovisningsmånad<input type="month" value={month} onChange={e => setMonth(e.target.value)} /></label>
     {earnings && <dl>
