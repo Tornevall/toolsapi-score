@@ -5,6 +5,7 @@ import './style.css';
 import { Goals } from './Goals';
 import { DailyEarnings } from './DailyEarnings';
 import { Observations } from './Observations';
+import { ScoreDashboard } from './ScoreDashboard';
 
 type ScoreEvent = { id: number; activity_name: string; quantity: number; points_snapshot: number; occurred_at: string };
 type ScoreComment = { id: number; event_id: number | null; body: string; created_at: string };
@@ -129,6 +130,7 @@ function App() {
     <header><h1>Tools Score</h1><p>Aktiviteter, antal, poäng och belöningar</p></header>
     {error && <p role="alert" className="error">{error}</p>}
     {notice && <p role="status">{notice}</p>}
+    <ScoreDashboard participant={participant} participants={participants} activities={activities} summaries={summaries} />
     <section><h2>Administrera deltagare och aktiviteter</h2>
       <form onSubmit={createParticipant}>
         <label>Ny deltagare<input value={newParticipant} maxLength={120} onChange={e => setNewParticipant(e.target.value)} required /></label>
