@@ -57,3 +57,5 @@ The interface uses responsive cards, accessible focus outlines, 44px minimum con
 Activity registration supports an optional historical date. Leaving it blank records the current time; choosing a date records local noon on that date. Already approved daily reviews are immutable and are not recalculated by backdated entries.
 
 Historical observations can be independent or linked to a routine. Choose note, activity, goal or deviation; mark complete, partial, incomplete or observation; optionally enter completed/expected counts and explanatory text. These entries do not change score points or allowance.
+
+The Score overview now includes monthly earnings, approved-day completion percentage, completed-quantity totals, recent observations, and lightweight CSS bar charts. Event-based activity totals are limited to the latest 100 events returned by the backend; the interface explicitly labels this limitation. The 80% dashboard counter is illustrative of that threshold and does not yet follow each participant's configured bonus threshold.
