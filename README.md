@@ -49,3 +49,13 @@ No license has been selected yet. Public visibility alone does not grant redistr
 
 ## Goals and planning (work in progress)
 The React client now has visual goal cards with category (personal, reward, planning), level and achievability ratings (1–5), a due date, a checklist and progress indicator. Owners can complete steps and approve completed goals using ToolsAPI session-authenticated endpoints. Completing or approving a goal does not automatically grant network access, pay money, or redeem a reward.
+
+## Visual design
+
+The interface uses responsive cards, accessible focus outlines, 44px minimum control heights, high-contrast notices and a mobile single-column layout. Styling is maintained in `src/style.css` without additional UI dependencies.
+
+Activity registration supports an optional historical date. Leaving it blank records the current time; choosing a date records local noon on that date. Already approved daily reviews are immutable and are not recalculated by backdated entries.
+
+Historical observations can be independent or linked to a routine. Choose note, activity, goal or deviation; mark complete, partial, incomplete or observation; optionally enter completed/expected counts and explanatory text. These entries do not change score points or allowance.
+
+The Score overview now includes monthly earnings, approved-day completion percentage, completed-quantity totals, recent observations, and lightweight CSS bar charts. Event-based activity totals are limited to the latest 100 events returned by the backend; the interface explicitly labels this limitation. The 80% dashboard counter is illustrative of that threshold and does not yet follow each participant's configured bonus threshold.

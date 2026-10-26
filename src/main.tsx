@@ -4,6 +4,8 @@ import { api, submitEvent, type Participant, type Activity, type Summary, type D
 import './style.css';
 import { Goals } from './Goals';
 import { DailyEarnings } from './DailyEarnings';
+import { Observations } from './Observations';
+import { ScoreDashboard } from './ScoreDashboard';
 
 type ScoreEvent = { id: number; activity_name: string; quantity: number; points_snapshot: number; occurred_at: string };
 type ScoreComment = { id: number; event_id: number | null; body: string; created_at: string };
@@ -24,6 +26,7 @@ function App() {
   const [participant, setParticipant] = useState('');
   const [activity, setActivity] = useState('');
   const [quantity, setQuantity] = useState(1);
+  const [historicalDate, setHistoricalDate] = useState('');
   const [newParticipant, setNewParticipant] = useState('');
   const [newActivity, setNewActivity] = useState('');
   const [newPoints, setNewPoints] = useState(0);
@@ -111,13 +114,13 @@ function App() {
     e.preventDefault();
     if (!participant || !activity || !Number.isInteger(quantity) || quantity < 1) return;
     setBusy(true); setNotice('');
-    const signature = JSON.stringify([participant, activity, quantity]);
-    if (!pendingSubmission.current || pendingSubmission.current.signature !== signature) pendingSubmission.current = { signature, key: crypto.randomUUID(), occurredAt: new Date().toISOString() };
+    const signature = JSON.stringify([participant, activity, quantity, historicalDate]);
+    if (!pendingSubmission.current || pendingSubmission.current.signature !== signature) pendingSubmission.current = { signature, key: crypto.randomUUID(), occurredAt: historicalDate ? new Date(historicalDate + 'T12:00:00').toISOString() : new Date().toISOString() };
     const submission = pendingSubmission.current;
     try {
       await submitEvent({ participant_id: Number(participant), activity_id: Number(activity), quantity, occurred_at: submission.occurredAt }, submission.key);
       pendingSubmission.current = null;
-      setNotice('Aktiviteten registrerades.'); await load();
+      setNotice(historicalDate ? 'Aktiviteten registrerades på valt datum.' : 'Aktiviteten registrerades.'); await load();
       setEvents(await api<ScoreEvent[]>('/participants/' + participant + '/events'));
     } catch (err) { setError(err instanceof Error ? err.message : 'Registreringen misslyckades.'); }
     finally { setBusy(false); }
@@ -127,6 +130,7 @@ function App() {
     <header><h1>Tools Score</h1><p>Aktiviteter, antal, poäng och belöningar</p></header>
     {error && <p role="alert" className="error">{error}</p>}
     {notice && <p role="status">{notice}</p>}
+    <ScoreDashboard participant={participant} participants={participants} activities={activities} summaries={summaries} />
     <section><h2>Administrera deltagare och aktiviteter</h2>
       <form onSubmit={createParticipant}>
         <label>Ny deltagare<input value={newParticipant} maxLength={120} onChange={e => setNewParticipant(e.target.value)} required /></label>
@@ -158,6 +162,7 @@ function App() {
         <label>Person<select value={participant} onChange={e => setParticipant(e.target.value)} required>{participants.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}</select></label>
         <label>Aktivitet<select value={activity} onChange={e => setActivity(e.target.value)} required>{activities.map(a => <option key={a.id} value={a.id}>{a.name} ({a.points > 0 ? '+' : ''}{a.points})</option>)}</select></label>
         <label>Antal<input type="number" min="1" step="1" value={quantity} onChange={e => setQuantity(Number(e.target.value))} required /></label>
+        <label>Historiskt datum (valfritt)<input type="date" value={historicalDate} max={new Date().toLocaleDateString('sv-SE')} onChange={e => setHistoricalDate(e.target.value)} /></label>
         <button disabled={busy || !participant || !activity}>{busy ? 'Sparar...' : 'Registrera'}</button>
       </form>
     </section>
@@ -173,6 +178,7 @@ function App() {
       </li>)}</ul>
     </section>
     <DailyEarnings participant={participant} activities={activities} />
+    <Observations participant={participant} activities={activities} />
     <Goals participant={participant} participants={participants} />
     <section><h2>Översikt</h2><div className="cards">{summaries.map(s => <article key={s.participant_id}>
       <h3>{participants.find(p => p.id === s.participant_id)?.name ?? 'Deltagare'}</h3>
