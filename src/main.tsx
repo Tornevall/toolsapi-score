@@ -24,6 +24,7 @@ function App() {
   const [participant, setParticipant] = useState('');
   const [activity, setActivity] = useState('');
   const [quantity, setQuantity] = useState(1);
+  const [historicalDate, setHistoricalDate] = useState('');
   const [newParticipant, setNewParticipant] = useState('');
   const [newActivity, setNewActivity] = useState('');
   const [newPoints, setNewPoints] = useState(0);
@@ -111,13 +112,13 @@ function App() {
     e.preventDefault();
     if (!participant || !activity || !Number.isInteger(quantity) || quantity < 1) return;
     setBusy(true); setNotice('');
-    const signature = JSON.stringify([participant, activity, quantity]);
-    if (!pendingSubmission.current || pendingSubmission.current.signature !== signature) pendingSubmission.current = { signature, key: crypto.randomUUID(), occurredAt: new Date().toISOString() };
+    const signature = JSON.stringify([participant, activity, quantity, historicalDate]);
+    if (!pendingSubmission.current || pendingSubmission.current.signature !== signature) pendingSubmission.current = { signature, key: crypto.randomUUID(), occurredAt: historicalDate ? new Date(historicalDate + 'T12:00:00').toISOString() : new Date().toISOString() };
     const submission = pendingSubmission.current;
     try {
       await submitEvent({ participant_id: Number(participant), activity_id: Number(activity), quantity, occurred_at: submission.occurredAt }, submission.key);
       pendingSubmission.current = null;
-      setNotice('Aktiviteten registrerades.'); await load();
+      setNotice(historicalDate ? 'Aktiviteten registrerades på valt datum.' : 'Aktiviteten registrerades.'); await load();
       setEvents(await api<ScoreEvent[]>('/participants/' + participant + '/events'));
     } catch (err) { setError(err instanceof Error ? err.message : 'Registreringen misslyckades.'); }
     finally { setBusy(false); }
@@ -158,6 +159,7 @@ function App() {
         <label>Person<select value={participant} onChange={e => setParticipant(e.target.value)} required>{participants.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}</select></label>
         <label>Aktivitet<select value={activity} onChange={e => setActivity(e.target.value)} required>{activities.map(a => <option key={a.id} value={a.id}>{a.name} ({a.points > 0 ? '+' : ''}{a.points})</option>)}</select></label>
         <label>Antal<input type="number" min="1" step="1" value={quantity} onChange={e => setQuantity(Number(e.target.value))} required /></label>
+        <label>Historiskt datum (valfritt)<input type="date" value={historicalDate} max={new Date().toLocaleDateString('sv-SE')} onChange={e => setHistoricalDate(e.target.value)} /></label>
         <button disabled={busy || !participant || !activity}>{busy ? 'Sparar...' : 'Registrera'}</button>
       </form>
     </section>
