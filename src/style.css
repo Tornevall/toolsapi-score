@@ -72,3 +72,28 @@ footer { color: var(--muted); font-size: .88rem; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition: none !important; scroll-behavior: auto !important; }
 }
+
+.score-dashboard-heading { display:flex; align-items:end; justify-content:space-between; gap:1rem; flex-wrap:wrap; }
+.score-dashboard-heading label { flex:0 1 200px; }
+.score-kpis { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:.8rem; margin:1rem 0; }
+.score-kpis article { display:grid; gap:.2rem; background:#edf4ff; }
+.score-kpis span { color:#4a607c; font-size:.87rem; }
+.score-kpis strong { font-size:clamp(1.3rem,2.7vw,2rem); letter-spacing:-.03em; }
+.score-kpis small { color:#526277; }
+.score-chart-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.8rem; margin:1rem 0; }
+.score-bars { display:flex; align-items:end; gap:.4rem; min-height:200px; overflow-x:auto; padding:.5rem 0; }
+.score-bar-column { flex:1 0 22px; min-width:22px; max-width:58px; height:190px; display:flex; flex-direction:column; align-items:center; gap:.3rem; font-size:.72rem; }
+.score-bar-column span { font-size:.7rem; }
+.score-bar-column small { color:#526277; }
+.score-bar-track { flex:1; width:100%; display:flex; align-items:end; border-radius:5px; background:#e4ebf5; overflow:hidden; }
+.score-bar-track > div { width:100%; background:#2457ad; border-radius:5px 5px 0 0; }
+.score-activity-bars { display:grid; gap:.9rem; }
+.score-activity-label { display:flex; justify-content:space-between; gap:1rem; font-size:.87rem; }
+.score-activity-track { height:11px; border-radius:20px; background:#e4ebf5; overflow:hidden; }
+.score-activity-track > div { height:100%; background:#14836e; border-radius:20px; }
+.score-recent { list-style:none; padding:0; }
+.score-recent li { padding:.75rem 0; border-bottom:1px solid #dbe3ed; display:flex; justify-content:space-between; gap:.8rem; flex-wrap:wrap; }
+.score-recent span { color:#526277; }
+.score-footnote { font-size:.8rem; color:#526277; }
+@media(max-width:800px) { .score-kpis { grid-template-columns:repeat(2,minmax(0,1fr)); } .score-chart-grid { grid-template-columns:1fr; } }
+@media(max-width:400px) { .score-kpis { grid-template-columns:1fr; } }
