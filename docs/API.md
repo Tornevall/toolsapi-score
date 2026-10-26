@@ -1,17 +1,30 @@
-# Backend integration contract
+# Score API contract (existing ToolsAPI endpoints)
 
-The frontend expects authenticated same-origin endpoints under `/api/score` (no API version path).
+All relative paths below use the canonical unversioned `/api/score` prefix. ToolsAPI enforces web-session authentication, CSRF on writes, parent/recipient authorization and resource ownership. This React repository does not supply its own backend or privileged tokens.
 
-- `GET /participants`: Participant[]
-- `GET /activities`: Activity[]
-- `GET /statistics`: Summary[]
-- `GET /deductions`: Deduction[]
-- `POST /events`: {participant_id, activity_id, quantity, occurred_at}; send Idempotency-Key.
+## Owner workflows
 
-All response shapes are defined in `src/api.ts`. These routes are a proposed contract, not an assertion that the ToolsAPI backend already implements them.
+- `GET/POST /participants`; `GET/POST /activities`; `GET /statistics`; `GET /deductions`; `GET /allowance-plans`; `PUT /allowance-plans/{participant}`.
+- `GET /participants/{participant}/events`; `POST /events` with a stable `Idempotency-Key` for uncertain retries; `GET/POST /participants/{participant}/comments` and `/observations`.
+- `GET/POST /participants/{participant}/goals`; `POST /goals/{goal}/steps/{step}/complete`; `POST /goals/{goal}/approve`.
+- `GET/POST /participants/{participant}/daily-reviews`; `GET /participants/{participant}/monthly-earnings?month=YYYY-MM`. ToolsAPI computes eligible routines and caps, not the browser.
+- `GET/POST /activity-groups`; `PUT /activities/{activity}/group` with nullable `group_id`. Activities share a household owner and retain their point-value history.
+- `GET /participants/{participant}/routine-progress?date=YYYY-MM-DD`; `PUT /participants/{participant}/routine-progress/{activity}` with `{date, percent, note}`. Percent may be 0-100.
+- `GET /participants/{participant}/schedules`; `PUT /participants/{participant}/schedules/{activity}` with `{starts_on, ends_on, frequency, interval_days, weekdays}`. Frequency is `daily`, `weekdays` or `interval`.
 
-Production deployments must use the authenticated ToolsAPI origin, secure session cookies and appropriate CSRF protection for state-changing requests. Never place a privileged API token in the browser bundle. The backend must enforce ownership and parent approvals, ledger consistency and audit logging. Rewards, schedules, corrections and approval screens will be implemented against confirmed backend contracts in later PRs.
+## Consent and read-only recipient
 
-## Planned allowance contract (not implemented)
+- Owner: `GET /link-requests`; `POST /participants/{participant}/link-request` `{email}`; `DELETE /participants/{participant}/link`.
+- Recipient: `GET /me/invitations`; `POST /me/invitations/{invitation}/respond` `{decision}`; `GET /me/linked`; `GET /me/linked/{participant}?date=YYYY-MM-DD&month=YYYY-MM`; `DELETE /me/linked/{participant}`.
+- Recipient read access to a linked participant never grants permission to mutate its owner records.
 
-ToolsAPI must provide owner-authorized allowance plans, eligible scheduled routines, exemption decisions, approved completion events, immutable revisions, and payout status. Frontend preview logic in `src/allowance.ts` is non-authoritative; never trust client-supplied earnings, completion percentages, or approvals. Store monetary values as integer minor units and ensure atomic cap enforcement/idempotency on the backend. An AI auditor may flag inconsistencies but must not approve, deduct, or transfer funds. Damage incidents are separate from earned allowances. No new API routes are asserted by this section.
+## Impact preview and irreversible delete
+
+- `GET /deletions/{type}/{id}` yields `{type,id,name,note,effects,token,expires_at}`; `DELETE /deletions/{type}/{id}` requires the unchanged `{name,token,expires_at}`.
+- Allowed types: `participant`, `activity`, `event`, `group`. A signed impact token expires after ten minutes; changed dependent state produces HTTP 409 and requires a fresh preview.
+- Legacy `DELETE /activity-groups/{group}` requires the same signed confirmation. All deletions are owner-only, atomic and independently audited; linked users cannot delete.
+
+## Deployment
+
+This client must be built and served on the same trusted ToolsAPI origin, with a real web login/CSRF session. The Vite development `/api` proxy does not replace login. Merge of this standalone repository does not install a production `/score-client` route. The existing native Tools Score web page at `/score` remains the available deployed entry point until a separate release integrates the React bundle.
+No API URL versions are used.

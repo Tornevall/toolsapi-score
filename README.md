@@ -14,7 +14,7 @@ Open-source React + TypeScript frontend for ToolsAPI's individual activity and s
 - Activity event history with direct comment-to-event selection
 - Typed HTTP client with session credentials and an idempotency key for registrations
 
-**Integration status:** ToolsAPI implements the Score endpoints on the matching backend feature branch. Deploy the matching ToolsAPI and React branches together; the frontend alone cannot serve or persist data. Automatic daily earning, payout settlement and Android integration are not yet implemented.
+**Integration status:** The unversioned Score owner, routine, account-consent and deletion endpoints are implemented in Tornevall/toolsApi on master. This React project is a separate client, not yet automatically deployed on /score merely by merging this PR. Serve on the authenticated ToolsAPI origin with normal web sessions and CSRF protection. Payout settlement and the separate Today/calendar-day buffering PR #2505 are not included.
 
 ## Development
 
@@ -59,3 +59,9 @@ Activity registration supports an optional historical date. Leaving it blank rec
 Historical observations can be independent or linked to a routine. Choose note, activity, goal or deviation; mark complete, partial, incomplete or observation; optionally enter completed/expected counts and explanatory text. These entries do not change score points or allowance.
 
 The Score overview now includes monthly earnings, approved-day completion percentage, completed-quantity totals, recent observations, and lightweight CSS bar charts. Event-based activity totals are limited to the latest 100 events returned by the backend; the interface explicitly labels this limitation. The 80% dashboard counter is illustrative of that threshold and does not yet follow each participant's configured bonus threshold.
+
+## Score Today, account links and safe deletion
+
+The React interface supports dated routine completion (0/partial/100 percent), custom groups, per-participant recurring schedules, Tools account consent invitations and a recipient-only read view. Owners can preview and permanently delete a participant, activity, event or group only after entering the exact name and confirming a short-lived signed preview. Deleting a participant removes that participant's history/links, not shared activity definitions; deleting an event/activity keeps its detached comments or observations. The backend enforces authentication, ownership, transactions, audit and permanent-deletion rules.
+
+Browser mutations authenticate through the current ToolsAPI web session using a CSRF meta token or same-origin Laravel XSRF cookie. Never embed a long-lived bearer token, service token, account JWT or credentials in the React app.

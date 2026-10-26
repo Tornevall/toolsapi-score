@@ -1,6 +1,8 @@
 # Changelog
 
 ## Unreleased
+- Align React Score with the shipped ToolsAPI contract: Today's routine progress, groups, individual schedules, account-link consent, recipient read-only view and signed owner-deletion previews.
+- Keep CSRF session authentication, stale-selection protection, responsive routine controls and existing event-idempotency behavior; update backend integration docs.
 - Add responsive Score overview with monthly earnings, approved-day completion, recent observations and activity charts; label API history limits.
 - Add a historical observation form for free-standing notes, routine-linked events, deviations, and partial goal completion.
 - Allow activity registration on an explicitly selected historical date, with the current timestamp as default.
