@@ -8,6 +8,7 @@ import { Observations } from './Observations';
 import { ScoreDashboard } from './ScoreDashboard';
 import { ScoreRoutines } from './ScoreRoutines';
 import { ScoreAccountsAndDeletion } from './ScoreAccountsAndDeletion';
+import { prepareEventSubmission, type PendingEvent } from './idempotency';
 
 type ScoreEvent = { id: number; activity_name: string; quantity: number; points_snapshot: number; occurred_at: string };
 type ScoreComment = { id: number; event_id: number | null; body: string; created_at: string };
@@ -46,7 +47,7 @@ function App() {
       allow_positive_points: found.allow_positive_points, allow_negative_points: found.allow_negative_points
     } : emptyPlan);
   }, [participant, plans]);
-  const pendingSubmission = useRef<{ signature: string; key: string; occurredAt: string } | null>(null);
+  const pendingSubmission = useRef<PendingEvent | null>(null);
 
   async function load() {
     try {
@@ -118,8 +119,8 @@ function App() {
     e.preventDefault();
     if (!participant || !activity || !Number.isInteger(quantity) || quantity < 1) return;
     setBusy(true); setNotice('');
-    const signature = JSON.stringify([participant, activity, quantity, historicalDate]);
-    if (!pendingSubmission.current || pendingSubmission.current.signature !== signature) pendingSubmission.current = { signature, key: crypto.randomUUID(), occurredAt: historicalDate ? new Date(historicalDate + 'T12:00:00').toISOString() : new Date().toISOString() };
+    pendingSubmission.current = prepareEventSubmission(pendingSubmission.current,
+      { participant, activity, quantity, historicalDate }, () => crypto.randomUUID(), () => new Date());
     const submission = pendingSubmission.current;
     try {
       await submitEvent({ participant_id: Number(participant), activity_id: Number(activity), quantity, occurred_at: submission.occurredAt }, submission.key);
