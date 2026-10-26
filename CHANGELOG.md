@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- Add responsive Score overview with monthly earnings, approved-day completion, recent observations and activity charts; label API history limits.
 - Add a historical observation form for free-standing notes, routine-linked events, deviations, and partial goal completion.
 - Allow activity registration on an explicitly selected historical date, with the current timestamp as default.
 - Refresh the Score visual design with responsive layouts, clear card hierarchy, keyboard focus states, and accessible form controls.
