@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- Add a historical observation form for free-standing notes, routine-linked events, deviations, and partial goal completion.
 - Allow activity registration on an explicitly selected historical date, with the current timestamp as default.
 - Refresh the Score visual design with responsive layouts, clear card hierarchy, keyboard focus states, and accessible form controls.
 - Configure weighted daily routines and exempt individual routines when approving a day; backend calculates completion from eligible weights.
