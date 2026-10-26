@@ -5,6 +5,7 @@ export type Deduction = { id: number; participant_id: number; reason: string; po
 export type EventInput = { participant_id: number; activity_id: number; quantity: number; occurred_at: string };
 const BASE = '/api/score';
 function csrfHeaders(): Record<string, string> {
+  if (typeof document === 'undefined') return {}; // Vitest/server-side rendering.
   const meta = document.querySelector<HTMLMetaElement>('meta[name="csrf-token"]')?.content;
   if (meta) return { 'X-CSRF-TOKEN': meta };
   // Laravel's web CSRF middleware also validates X-XSRF-TOKEN from its same-origin cookie.

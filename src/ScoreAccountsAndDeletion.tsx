@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { api, type Activity, type Participant } from './api';
 
 type OwnedLink = { participant_id: number; participant_name: string; linked_user_id: number | null; linked_user_name: string | null; request_status: string | null; expires_at: string | null };
@@ -50,6 +50,7 @@ export function ScoreAccountsAndDeletion({ participant, participants, activities
   const [events, setEvents] = useState<Event[]>([]);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
+  const selection = useRef('');
 
   async function load() {
     const [ownedRows, pending, mine, groupRows, eventRows] = await Promise.all([
@@ -106,19 +107,21 @@ export function ScoreAccountsAndDeletion({ participant, participants, activities
     deleteType === 'group' ? groups :
     events.map(e => ({ id: e.id, name: 'Registrering #' + e.id + ' · ' + e.activity_name + ' (' + e.occurred_at + ')' }));
   const visibleDeleteId = choices.some(r => String(r.id) === deleteId) ? deleteId : String(choices[0]?.id ?? '');
+  selection.current = deleteType + ':' + visibleDeleteId;
 
   async function requestPreview() {
     if (!visibleDeleteId) return;
+    const requested = selection.current;
     setPreview(null); setTyped(''); setBusy(true); setError('');
     try {
       const data = await api<DeletePreview>('/deletions/' + deleteType + '/' + visibleDeleteId);
-      setPreview(data);
+      if (selection.current === requested) setPreview(data);
     } catch (e) { setError(String(e)); }
     finally { setBusy(false); }
   }
 
   async function confirmDelete() {
-    if (!preview || typed !== preview.name || !window.confirm('Radera ' + preview.name + ' permanent? Detta går inte att ångra.')) return;
+    if (!preview || selection.current !== preview.type + ':' + preview.id || typed !== preview.name || !window.confirm('Radera ' + preview.name + ' permanent? Detta går inte att ångra.')) return;
     const current = preview;
     setBusy(true); setError('');
     try {
@@ -126,7 +129,8 @@ export function ScoreAccountsAndDeletion({ participant, participants, activities
         method: 'DELETE', body: JSON.stringify({ name: current.name, token: current.token, expires_at: current.expires_at })
       });
       setPreview(null); setTyped(''); setDeleteId('');
-      await refresh(); await load();
+      await refresh();
+      // The parent reselects a valid participant and bumps revision; its effect refreshes all lists.
       setLinkMessage('Posten och dess valda beroenden raderades.');
     } catch (e) {
       setPreview(null); setTyped('');
@@ -211,7 +215,7 @@ export function ScoreAccountsAndDeletion({ participant, participants, activities
           <li key={key}>{effectLabels[key] ?? key}: {count}</li>)}</ul>
         <p>Gäller till {new Date(preview.expires_at).toLocaleString('sv-SE')}</p>
         <label>Skriv namnet exakt<input autoComplete="off" maxLength={160} value={typed} onChange={e => setTyped(e.target.value)} /></label>
-        <button className="danger" disabled={busy || typed !== preview.name} onClick={() => void confirmDelete()}>Radera permanent</button>
+        <button className="danger" disabled={busy || selection.current !== preview.type + ':' + preview.id || typed !== preview.name} onClick={() => void confirmDelete()}>Radera permanent</button>
       </div>}
     </section>
   </>;
